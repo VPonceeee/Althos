@@ -1,5 +1,6 @@
 import tkinter as tk
-from DashboardPage import Dashboard  # Assuming Dashboard is a frame-based class
+from DashboardPage import Dashboard  
+from ViewGroup_Form import ViewGroup
 
 class MainPage(tk.Tk):
     def __init__(self,username,AccID):
@@ -7,9 +8,10 @@ class MainPage(tk.Tk):
 
         # Form Section ---------------------------------------------------------------------
         self.title("ALTHOS Dashboard")  
+        self.state('zoomed')
         form_width, form_height = 800, 600  
         self.geometry(f"{form_width}x{form_height}") 
-        self.minsize(form_width, form_height) 
+        self.minsize(800, 600) 
 
         # Center the form on the screen
         screen_width = self.winfo_screenwidth()
@@ -33,21 +35,29 @@ class MainPage(tk.Tk):
         self.bottom_panel.pack(side="bottom", fill="x")
 
         # Center Panel Section ---------------------------------------------------------------------
-        self.center_panel = tk.Frame(self, bg="white")  # Background to see the panel clearly
+        self.center_panel = tk.Frame(self, bg="white") 
         self.center_panel.pack(side="top", fill="both", expand=True)
 
         # Panel for page name ---------------------------------------------------------------------
-        self.TopLeft_panel = tk.Frame(self.top_panel, height=60, width=300) 
+        self.TopLeft_panel = tk.Frame(self.top_panel, height=60, width=400) 
         self.TopLeft_panel.pack(side="left", fill="both", padx=(10,10), pady=(10,10))
+
+        # Panel for Back Button
+        self.BackBtn_pnl = tk.Frame(self.TopLeft_panel)
+        self.BackBtn_pnl.pack(side="left", fill="both", expand=True,  padx=(5,5))
+
+        # Back Button
+        self.Back_btn = tk.Button(self.BackBtn_pnl, text="←", font=("Arial", 10, "bold"), command=self.ShowDashboard, relief="flat", fg="Black")
+        self.Back_btn.pack(side="left")
+        self.Back_btn.pack_forget() 
 
         self.TopRight_panel = tk.Frame(self.top_panel, height=60, width=300) 
         self.TopRight_panel.pack(side="right", fill="both", padx=(10,10), pady=(10,10))
 
         # Page Label ---------------------------------------------------------------------
         self.PageName_lbl = tk.Label(self.TopLeft_panel, text="", font=("Arial", 18, "bold"), fg="Black")
-        self.PageName_lbl.pack(anchor="w")
-        self.PageName_lbl.config(text=f"Dashboard")
-
+        self.PageName_lbl.pack(anchor="w", pady=(10,10))
+     
         self.username = username
         self.AccID = AccID
 
@@ -60,16 +70,32 @@ class MainPage(tk.Tk):
         self.UserID_lbl.config(text=f"{self.AccID}")
         
         # Load the Dashboard
-        self.ShowDashboard()  # Corrected to call the method properly
+        self.ShowDashboard() 
 
     # Function and condition section -----------------------------------------------------------------------------------
+
+    #Show the Dashboard page
     def ShowDashboard(self): 
-        # Clear any existing widgets in the center panel
         for widget in self.center_panel.winfo_children():  
             widget.destroy()  
 
-        # Create and display the Dashboard inside the center panel
-        ShowDashboard = Dashboard(self.center_panel, self.username, self.AccID) 
+        ShowDashboard = Dashboard(self.center_panel, self.username, self.AccID,self.ShowViewGroup) 
         ShowDashboard.pack(fill=tk.BOTH, expand=True)
+        self.PageName_lbl.config(text="Dashboard")
+        self.Back_btn.pack_forget()
+
+    #Show the View Group page
+    def ShowViewGroup(self, group_name, group_id):
+        for widget in self.center_panel.winfo_children():
+            widget.destroy()
+
+        view_group = ViewGroup(self.center_panel, group_name,group_id)
+        view_group.pack(fill=tk.BOTH, expand=True)
+        
+        # Update the label to display both group_name and group_id
+        self.PageName_lbl.config(text=f"{group_name}")
+        self.Back_btn.pack(side="left")
+        
+
 
 

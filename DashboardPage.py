@@ -4,12 +4,15 @@ from pymongo import MongoClient
 from bson import ObjectId
 
 class Dashboard(tk.Frame): 
-    def __init__(self, parent, username, AccID):
+    def __init__(self, parent, username, AccID, ShowViewGroup):
         super().__init__(parent)
 
         # Store the username and Account ID
         self.username = username
         self.AccID = AccID
+
+        #To show the view group on the main page
+        self.ShowViewGroup = ShowViewGroup
 
         # Frame to display groups
         self.group_frame = tk.Frame(self)
@@ -38,6 +41,7 @@ class Dashboard(tk.Frame):
         # Load and display groups
         self.load_groups()
 
+    #SHOW THE ADD GROUP PAGE 
     def ShowAddGroupPage(self):
         AddGroups(self, self.AccID).wait_window()
         self.load_groups()
@@ -47,7 +51,7 @@ class Dashboard(tk.Frame):
         for widget in self.inner_frame.winfo_children():
             widget.destroy()
 
-        # Re-add the plus button inside the inner frame
+        # Re-add the plus button
         self.plus_button = tk.Button(self.inner_frame, text="+", relief="solid", font=("Arial", 14), command=self.ShowAddGroupPage)
         self.plus_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         self.plus_button.config(width=20, height=6, bd=2)
@@ -66,7 +70,8 @@ class Dashboard(tk.Frame):
             column = 1  # Start from the second column to leave space for the plus button
             for group in groups:
                 group_name = group["GroupName"]
-                group_button = tk.Button(self.inner_frame, text=group_name, font=("Arial", 14), relief="solid", width=20, height=6, bd=2)
+                group_id = str(group["_id"])
+                group_button = tk.Button(self.inner_frame, text=group_name, font=("Arial", 14), relief="solid", width=20, height=6, bd=2,command=lambda g_name=group_name, g_id=group_id: self.ShowViewGroup(g_name, g_id))
                 group_button.grid(row=0, column=column, padx=5, pady=5, sticky="w")
                 column += 1  # Move to the next column after each button
 
