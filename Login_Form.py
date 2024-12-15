@@ -42,6 +42,16 @@ class LoginForm(tk.Tk):
         self.Info_panel = tk.Frame(self, height=200) 
         self.Info_panel.pack(side="top", fill="x", padx=(25, 25))
 
+        # Show Password and Status Message Panel Section ---------------------------------------------------------------------
+        self.InfoBottom_pnl = tk.Frame(self, height=40)
+        self.InfoBottom_pnl.pack(side="top", fill="x", padx=(25, 25))
+        self.InfoBottom_pnl.pack_propagate(False)
+
+        # Buttons Panel Section ---------------------------------------------------------------------
+        self.btn_pnl = tk.Frame(self, height=110)
+        self.btn_pnl.pack(side="top", fill="x", padx=(25, 25))
+        self.btn_pnl.pack_propagate(False)
+
         # Email Label
         self.Email_lbl = tk.Label(self.Info_panel, text="", font=("Arial", 10, "bold")) 
         self.Email_lbl.pack(side="top", anchor="w", padx=1, pady=(10, 2))
@@ -61,15 +71,19 @@ class LoginForm(tk.Tk):
         self.Pass_txtb.pack(anchor="w", padx=1, pady=1)
 
         # Show Password Checkbox
-        self.ShowPass_cb = tk.Checkbutton(self.Info_panel, text="Show Password", font=("Arial", 10), command=self.ShowPassword)
-        self.ShowPass_cb.pack(anchor="w", padx=1, pady=1)
+        self.ShowPass_cb = tk.Checkbutton(self.InfoBottom_pnl, text="Show Password", font=("Arial", 10), command=self.ShowPassword)
+        self.ShowPass_cb.pack(side="left", padx=1, pady=(10,10))
+
+        #Status Message
+        self.Status_lbl = tk.Label(self.InfoBottom_pnl, text="", font=("Arial", 10), fg="red")
+        self.Status_lbl.pack(side="right", padx=(5,5), pady=(10,10))
 
         # Login Button
-        self.Login_btn = tk.Button(self.Info_panel, text="Login", bg="green", fg="white", height=2, width=50, relief="flat", command=self.ReadData)
+        self.Login_btn = tk.Button(self.btn_pnl, text="Login", bg="green", fg="white", height=2, width=50, relief="flat", command=self.ReadData)
         self.Login_btn.pack(anchor="w", padx=1, pady=(10, 7))
 
         # SignUp Button
-        self.SignUp_btn = tk.Button(self.Info_panel, text="Sign Up", bg="green", fg="white", height=2, width=50, relief="flat", command=self.ShowSignUpForm)
+        self.SignUp_btn = tk.Button(self.btn_pnl, text="Sign Up", bg="green", fg="white", height=2, width=50, relief="flat", command=self.ShowSignUpForm)
         self.SignUp_btn.pack(anchor="w", padx=1, pady=1)
 
 
@@ -87,6 +101,7 @@ class LoginForm(tk.Tk):
 
         if not email or not password:
             print("Please fill out both fields!")
+            self.Status_lbl.config(text="Please fill out both fields!", fg="red")
             return
 
         try:
@@ -99,6 +114,7 @@ class LoginForm(tk.Tk):
                 MainPageForm.mainloop()
             else:
                 print("Invalid email or password! Please try again.")
+                self.Status_lbl.config(text="Incorrect email or password!", fg="red")
 
         except Exception as e:
             print("Error querying the database:", e)
@@ -113,3 +129,4 @@ class LoginForm(tk.Tk):
 if __name__ == "__main__":  
     app = LoginForm()  
     app.mainloop()
+

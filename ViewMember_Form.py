@@ -1,6 +1,10 @@
 import tkinter as tk
 from pymongo import MongoClient
 from bson import ObjectId
+import socket
+from PIL import Image, ImageTk
+import io
+import threading
 
 
 class ViewMember(tk.Toplevel):
@@ -10,9 +14,6 @@ class ViewMember(tk.Toplevel):
         #Get the Value
         self.device_name = device_name
         self.device_ip = device_ip
-
-        # Database Connection Section ---------------------------------------------------------------------
-
 
         #Form Properties Section ---------------------------------------------------------------------
         self.title(f"Monitoring - {self.device_name} ({self.device_ip})")  
@@ -62,9 +63,9 @@ class ViewMember(tk.Toplevel):
         #self.Mouse_pnl.pack_propagate(False)
 
         self.Camera_picb()
-        self.Screen_picb()
+        self.ScreenHolder()
         self.keyboardMouseData()
-
+        threading.Thread(target=self.receive_screen).start()
 
 #FUNCTIONS AND CONDITIONS SECTION ---------------------------------------------------------------------
 
@@ -80,18 +81,53 @@ class ViewMember(tk.Toplevel):
         msg_label.place(relx=0.5, rely=0.5, anchor="center") 
 
     #Screen picture box
-    def Screen_picb(self):
+    def ScreenHolder(self):
         # Create a frame for the PictureBox content
-        Screen_picb = tk.Frame(self.Screen_pnl, bg="lightgray", height=400, width=680,highlightbackground="black",highlightthickness=2)
-        Screen_picb.pack(side="top", fill="x", padx=10, pady=(5,10))
-        Screen_picb.pack_propagate(False)
+        self.Screen_picb = tk.Frame(self.Screen_pnl, bg="lightgray", height=400, width=680,highlightbackground="black",highlightthickness=2)
+        self.Screen_picb.pack(side="top", fill="x", padx=10, pady=(5,10))
+        self.Screen_picb.pack_propagate(False)
 
         # Display message
-        msg_label = tk.Label(Screen_picb, text="No Screen Available", font=("Arial", 14, "bold"), bg="lightgray",fg="black")
-        msg_label.place(relx=0.5, rely=0.5, anchor="center") 
+        self.msg_label = tk.Label(self.Screen_picb, text="No Screen Available", font=("Arial", 14, "bold"), bg="lightgray",fg="black")
+        self.msg_label.place(relx=0.5, rely=0.5, anchor="center") 
 
     def keyboardMouseData(self):
 
         # Display message
         msg_label = tk.Label(self.Keyboard_pnl, text="No Keyboard & Mouse Data", font=("Arial", 14, "bold"), bg="lightgray",fg="black")
         msg_label.place(relx=0.5, rely=0.5, anchor="center") 
+
+    def receive_screen(self):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                client_socket.connect((self.device_ip, 5000))  
+                
+                while True:
+                   
+                    length = client_socket.recv(4)
+                    if len(length) < 4:
+                        break 
+                    data_length = int.from_bytes(length, 'big')
+                    
+                    # Receive the image data
+                    data = b""
+                    while len(data) < data_length:
+                        packet = client_socket.recv(data_length - len(data))
+                        if not packet:
+                            break
+                        data += packet
+                    
+                    if data:
+                       
+                        image = Image.open(io.BytesIO(data))
+                        image = image.resize((680, 400))  
+                        photo = ImageTk.PhotoImage(image)
+
+                        self.msg_label.config(image=photo)
+                        self.msg_label.image = photo  
+
+        except Exception as e:
+            print(f"Error receiving screen: {e}")
+
+
+   

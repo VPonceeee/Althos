@@ -49,11 +49,9 @@ class ViewGroup(tk.Frame):
 
     #Display the data 
     def load_members(self):
-        # Clear existing buttons
         for widget in self.inner_frame.winfo_children():
             widget.destroy()
 
-        # Re-add the "+" button
         self.plus_button = tk.Button(self.inner_frame, text="+", relief="solid", font=("Arial", 14), command=self.ShowAddMemberPage)
         self.plus_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         self.plus_button.config(width=20, height=6, bd=2)
@@ -65,19 +63,19 @@ class ViewGroup(tk.Frame):
             db = client["ADB"]
             members_collection = db["Members"]
 
-            # Query to find all members for the specific group
             members = members_collection.find({"GroupID": ObjectId(self.group_id)})
 
-            # Add each member as a button
             column = 1
             for index, member in enumerate(members, start=1):
                 device_name = member["DeviceName"]
                 device_ip = member["DeviceIP"]
 
-                # Create a button for each member
                 member_button = tk.Button(self.inner_frame, text=f"{device_name}", relief="solid", font=("Arial", 14),width=20, height=6, bd=2, command=lambda name=device_name, ip=device_ip: self.ViewMemberPage(name, ip))
                 member_button.grid(row=0, column=column, padx=5, pady=5, sticky="w")
                 column += 1
 
         except Exception as e:
             print(f"Error fetching members: {e}")
+
+
+
