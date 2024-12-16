@@ -19,16 +19,14 @@ class MainForm(tk.Tk):
         y = (screen_height - Formheight) // 2  
         self.geometry(f"{Formwidth}x{Formheight}+{x}+{y}") 
 
-
-
-        # Panel Section ---------------------------------------------------------------------
+        # Panel Section
         self.left_pnl = tk.Frame(self, bg="lightgray", width=240, height=Formheight)  
         self.left_pnl.pack(side="left", fill="y", expand=False)
 
         self.main_panel = tk.Frame(self) 
-        self.main_panel.pack(side="left", fill="both", expand=True,padx=5)
+        self.main_panel.pack(side="left", fill="both", expand=True, padx=5)
 
-        # Button section ---------------------------------------------------------------------
+        # Button section
         self.spacer1_pnl = tk.Frame(self.left_pnl, bg="lightgray", width=30, height=2)  
         self.spacer1_pnl.pack(side="top", fill="x", padx=10, pady=5)
 
@@ -45,14 +43,16 @@ class MainForm(tk.Tk):
         self.screen_btn.pack(side="top", fill="x", padx=10, pady=2)
 
         # Stop All Service Button
-        self.stop_btn = tk.Button(self.left_pnl, text="Stop All Service", bg="white", height=2, width=30, relief="flat")
+        self.stop_btn = tk.Button(self.left_pnl, text="Stop All Service", bg="white", height=2, width=30, relief="flat", command=self.stop_all_services)
         self.stop_btn.pack(side="top", fill="x", padx=10, pady=2)
 
-        #Form Load ---------------------------------------------------------------------
-        self.Show_ScreenSharing() 
+        # Form Load
+        self.screen_sharing_form = None
+        self.Show_ScreenSharing()
         self.Show_DeviceInfo()
 
-
+        # Bind window close event to stop sharing
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def Show_DeviceInfo(self): 
         for widget in self.main_panel.winfo_children():  
@@ -65,19 +65,28 @@ class MainForm(tk.Tk):
         for widget in self.main_panel.winfo_children():  
             widget.destroy()  
 
-        ScreenSharing = ScreenSharing_Form(self.main_panel) 
-        ScreenSharing.pack(fill=tk.BOTH, expand=True)
-        ScreenSharing.start_sharing()
-        
+        self.screen_sharing_form = ScreenSharing_Form(self.main_panel) 
+        self.screen_sharing_form.pack(fill=tk.BOTH, expand=True)
+        self.screen_sharing_form.start_sharing()
+
     def Show_CameraSharing(self): 
         for widget in self.main_panel.winfo_children():  
             widget.destroy()  
 
         CameraSharing = CameraSharing_Form(self.main_panel) 
-        CameraSharing.pack(fill=tk.BOTH, expand=True)  
+        CameraSharing.pack(fill=tk.BOTH, expand=True)
 
+    def stop_all_services(self):
+        if self.screen_sharing_form:
+            self.screen_sharing_form.stop_sharing()
+
+    def on_closing(self):
+        # Stop screen sharing before closing the app
+        if self.screen_sharing_form:
+            self.screen_sharing_form.stop_sharing()
+        self.quit()
 
 # Start the Tkinter event loop
 if __name__ == "__main__":  
     app = MainForm()  
-    app.mainloop()  
+    app.mainloop()
